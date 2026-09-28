@@ -1,4 +1,4 @@
-# Mi Control de Notas · UDELAS Ingeniería Biomédica
+# Mi Control de Notas · Ingeniería Biomédica
 
 Página web para llevar el control de calificaciones (5 años, 33/33/34, índice acumulado).
 
