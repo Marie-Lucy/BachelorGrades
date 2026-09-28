@@ -6,12 +6,12 @@
 //  Mientras apiKey diga "PEGA_...", la app funciona igual,
 //  pero solo guarda las notas en el dispositivo donde la abras.
 // ============================================================
-
+// Configuración de Firebase para Mi Control de Notas
 export const firebaseConfig = {
-    apiKey: "PEGA_AQUI_TU_API_KEY",
-    authDomain: "tu-proyecto.firebaseapp.com",
-    projectId: "tu-proyecto",
-    storageBucket: "tu-proyecto.appspot.com",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:0000000000000000"
+    apiKey: "AIzaSyCQ9Lz_DQoa-l_BbL25dLW8cJMNq8gjYNk",
+    authDomain: "bachelor-grades.firebaseapp.com",
+    projectId: "bachelor-grades",
+    storageBucket: "bachelor-grades.firebasestorage.app",
+    messagingSenderId: "216532232259",
+    appId: "1:216532232259:web:8bcea7dbcee0c05c4dccf6"
 };
