@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Control de Notas | UDELAS - Ingeniería Biomédica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                            950: '#4c0519',
+                        },
+                        petal: '#fff5f7',
+                        blush: '#fdf2f4'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe4e6 50%, #fff1f2 100%);
+            min-height: 100vh;
+        }
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe4e6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fb7185;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f43f5e;
+        }
+    </style>
+</head>
+<body class="text-stone-800 antialiased p-3 sm:p-6 lg:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Header Card -->
+        <header class="bg-white/85 backdrop-blur-md border border-rose-200/70 rounded-3xl p-6 sm:p-8 shadow-xl shadow-rose-200/40 relative overflow-hidden">
+            <div class="absolute -right-8 -top-8 w-52 h-52 bg-gradient-to-br from-rose-200/40 to-pink-300/30 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -left-8 -bottom-8 w-44 h-44 bg-rose-100/50 rounded-full blur-xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold uppercase tracking-wider mb-2">
+                        <span>🎓 UDELAS • Ingeniería Biomédica (Acuerdo 041-2023)</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-serif font-bold text-rose-950 tracking-tight">
+                        Mi Portal de Calificaciones
+                    </h1>
+                    <p class="text-xs sm:text-sm text-rose-700/80 mt-1 max-w-2xl leading-relaxed">
+                        Plan de estudio completo (5 Años • 10 Semestres • 4 Veranos • 249 Créditos). Revisa notas históricas, calcula ponderaciones en curso (33% Parciales, 33% Tareas, 34% Semestral) o edita cualquier período libremente.
+                    </p>
+                </div>
+
+                <!-- Main Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div id="cloudStatusBadge" class="px-3 py-2 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition">
+                        <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="cloudStatusText">Cargando...</span>
+                    </div>
+                    <button id="btnOpenCloudModal" class="px-3.5 py-2.5 rounded-2xl bg-white border border-rose-300 text-rose-800 hover:bg-rose-50 text-xs font-semibold shadow-xs transition flex items-center gap-1.5" title="Sincronizar con celular u otra computadora">
+                        <span>☁️ Cuenta y Sincronización</span>
+                    </button>
+                    <button id="btnViewToggle" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-medium shadow-md shadow-rose-400/30 transition transform active:scale-95 text-xs sm:text-sm flex items-center gap-2">
+                        <span id="btnViewToggleIcon">📋</span>
+                        <span id="btnViewToggleText">Vista Histórica General</span>
+                    </button>
+                    <button id="btnOpenNewSubject" class="px-3.5 py-2.5 rounded-2xl bg-white border border-rose-300 text-rose-800 hover:bg-rose-50 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>Añadir Materia</span>
+                    </button>
+                    <button id="btnResetPlan" class="px-3.5 py-2.5 rounded-2xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold shadow-xs transition" title="Restaurar materias oficiales y notas">
+                        🔄 Recargar UDELAS
+                    </button>
+                    <button id="btnExport" class="p-2.5 rounded-2xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition shadow-xs" title="Descargar copia de seguridad JSON">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </button>
+                    <button id="btnImport" class="p-2.5 rounded-2xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 transition shadow-xs" title="Importar copia de seguridad JSON">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    </button>
+                    <input type="file" id="importFileInput" accept=".json,application/json" class="hidden">
+                </div>
+            </div>
+        </header>
+
+        <!-- Year & Period Navigation Container -->
+        <div id="navigationPanel" class="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-rose-200 shadow-sm space-y-4">
+            <!-- Year Selector Tabs -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-rose-100">
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-900 mr-2 flex items-center gap-1">
+                        📅 Año Académico:
+                    </span>
+                    <div id="yearTabsContainer" class="flex gap-1.5">
+                        <!-- Dynamic Year Buttons 1 through 5 -->
+                    </div>
+                </div>
+                <span class="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200">
+                    5 Años Registrados
+                </span>
+            </div>
+
+            <!-- Semester / Verano Tabs within Selected Year -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div id="periodTabsContainer" class="flex flex-wrap gap-2">
+                    <!-- Dynamic period buttons: Primer Semestre, Segundo Semestre, Verano -->
+                </div>
+                <div id="yearNotice" class="text-xs text-rose-600/90 italic font-medium">
+                    <!-- Informative badge -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Global & Period Key Academic Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white/85 backdrop-blur-sm border border-rose-100 rounded-3xl p-4 sm:p-5 shadow-sm">
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider block mb-1">Promedio del Período</span>
+                <div class="flex items-baseline gap-1.5">
+                    <span id="statPeriodAvg" class="text-3xl font-bold text-rose-950">0.00</span>
+                    <span class="text-xs text-rose-400 font-medium">/ 100</span>
+                </div>
+                <div id="statPeriodBadge" class="mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700">
+                    Calculando...
+                </div>
+            </div>
+
+            <div class="bg-white/85 backdrop-blur-sm border border-rose-100 rounded-3xl p-4 sm:p-5 shadow-sm">
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider block mb-1">Índice Acumulado Global</span>
+                <div class="flex items-baseline gap-1.5">
+                    <span id="statCumulativeIndex" class="text-3xl font-bold text-rose-950">0.00</span>
+                    <span class="text-xs text-rose-400 font-medium">(A=3, B=2, C=1)</span>
+                </div>
+                <p id="statCreditsEarned" class="text-xs text-stone-500 mt-2">Créditos aprobados: 0 / 249</p>
+            </div>
+
+            <div class="bg-white/85 backdrop-blur-sm border border-rose-100 rounded-3xl p-4 sm:p-5 shadow-sm">
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider block mb-1">Materias Aprobadas</span>
+                <span id="statPassingRatio" class="text-3xl font-bold text-emerald-600">0 / 0</span>
+                <p id="statPassingRatioSub" class="text-xs text-stone-500 mt-2">En este bloque académico</p>
+            </div>
+
+            <div class="bg-white/85 backdrop-blur-sm border border-rose-100 rounded-3xl p-4 sm:p-5 shadow-sm">
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider block mb-1">Créditos del Período</span>
+                <span id="statPeriodCredits" class="text-3xl font-bold text-rose-900">0</span>
+                <p class="text-xs text-stone-500 mt-2">Carga académica oficial</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-rose-200/50">
+            <div class="relative w-full sm:w-80">
+                <input id="searchInput" type="text" placeholder="Buscar código o asignatura..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-rose-200 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 placeholder-rose-300">
+                <svg class="w-4 h-4 text-rose-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end text-xs">
+                <span class="text-stone-500 flex items-center gap-1.5 font-medium">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> A (91-100) = 3pts
+                </span>
+                <span class="text-stone-500 flex items-center gap-1.5 font-medium">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> B (81-90) = 2pts
+                </span>
+                <span class="text-stone-500 flex items-center gap-1.5 font-medium">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> C (71-80) = 1pt
+                </span>
+            </div>
+        </div>
+
+        <!-- Detailed View (Cards with 33/33/34 breakdown or Direct Grade) -->
+        <div id="detailedViewSection" class="space-y-6">
+            <div id="subjectsContainer" class="space-y-6">
+                <!-- Dynamically rendered subject cards -->
+            </div>
+
+            <!-- Empty State for Detailed View -->
+            <div id="emptyState" class="hidden text-center py-16 px-6 bg-white/70 rounded-3xl border border-dashed border-rose-300">
+                <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-3 text-rose-500">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <h3 class="text-lg font-serif font-bold text-rose-950 mb-1">No hay materias en este período</h3>
+                <p class="text-xs text-rose-700/70 max-w-sm mx-auto mb-4">Puedes agregar una asignatura manualmente o recargar el plan oficial.</p>
+                <button onclick="openNewSubjectModal()" class="px-5 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-medium text-xs shadow-md transition">
+                    + Agregar Asignatura
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Full Overview Sheet (Allows seeing and setting grades across ALL 5 years in one screen) -->
+        <div id="globalSheetSection" class="hidden space-y-6">
+            <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 border border-rose-200/80 shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-rose-100">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-500">Plan de Estudio Completo • 72 Asignaturas</span>
+                        <h2 class="text-2xl font-serif font-bold text-rose-950">Sábana Histórica de Calificaciones</h2>
+                        <p class="text-xs text-stone-500 mt-0.5">Haz clic sobre cualquier letra (A, B, C...) para asignar tu nota rápida a cualquier materia de cualquier año.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-rose-800 bg-rose-100 px-3 py-1.5 rounded-xl">
+                            Progreso: <span id="sheetProgressBadge">0 / 249 Cr</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div id="globalYearsList" class="space-y-6 pt-5">
+                    <!-- Rendered across all 5 years -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal for Adding / Editing a Subject -->
+    <div id="subjectModal" class="fixed inset-0 bg-stone-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-rose-200 relative">
+            <button id="btnCloseSubjectModal" class="absolute top-5 right-5 text-rose-300 hover:text-rose-600 p-1 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h3 id="subjectModalTitle" class="text-2xl font-serif font-bold text-rose-950 mb-1">Nueva Asignatura</h3>
+            <p class="text-xs text-rose-600 mb-5">Configura la materia y su modalidad de calificación.</p>
+
+            <form id="subjectForm" class="space-y-4">
+                <input type="hidden" id="formSubjectId">
+                <input type="hidden" id="formSubjectYear">
+                <input type="hidden" id="formSubjectPeriod">
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Código</label>
+                        <input type="text" id="formSubjectCode" placeholder="Ej. 5796" class="w-full px-3 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Nombre Asignatura *</label>
+                        <input type="text" id="formSubjectName" required placeholder="Ej. Cálculo Integral" class="w-full px-3.5 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Créditos Oficiales</label>
+                        <input type="number" id="formSubjectCredits" min="0" max="25" value="3" required class="w-full px-3 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Profesor / Docente</label>
+                        <input type="text" id="formSubjectTeacher" placeholder="Opcional" class="w-full px-3 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Modalidad de Evaluación</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 cursor-pointer hover:bg-rose-50">
+                            <input type="radio" name="calcMode" value="breakdown" checked class="text-rose-500 focus:ring-rose-400">
+                            <span class="text-xs font-medium text-rose-900">33 / 33 / 34 (En Curso)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-rose-200 bg-rose-50/50 cursor-pointer hover:bg-rose-50">
+                            <input type="radio" name="calcMode" value="direct" class="text-rose-500 focus:ring-rose-400">
+                            <span class="text-xs font-medium text-rose-900">Nota Directa / Aprobada</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Direct grade container (toggled when direct mode selected) -->
+                <div id="directGradeField" class="hidden p-3.5 rounded-2xl bg-petal border border-rose-200 space-y-2">
+                    <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider">Calificación Final Obtenida</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <span class="text-[11px] text-stone-500 block mb-1">Letra Oficial (A, B, C...)</span>
+                            <select id="formDirectLetter" class="w-full px-3 py-1.5 rounded-xl border border-rose-200 bg-white text-xs sm:text-sm">
+                                <option value="A">A (91 - 100) • 3.0 pts</option>
+                                <option value="B">B (81 - 90) • 2.0 pts</option>
+                                <option value="C">C (71 - 80) • 1.0 pt</option>
+                                <option value="D">D (61 - 70) • 0.0 pts</option>
+                                <option value="F">F (&lt; 61) • Reprobada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-[11px] text-stone-500 block mb-1">Puntos Numéricos (0-100)</span>
+                            <input type="number" id="formDirectScore" min="0" max="100" step="1" value="95" class="w-full px-3 py-1.5 rounded-xl border border-rose-200 bg-white text-xs sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2.5 pt-4 border-t border-rose-100">
+                    <button type="button" id="btnCancelSubject" class="px-4 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-medium">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-md shadow-rose-300">Guardar Asignatura</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Activity / Exam items (33/33/34 breakdown) -->
+    <div id="itemModal" class="fixed inset-0 bg-stone-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200 relative">
+            <button id="btnCloseItemModal" class="absolute top-5 right-5 text-rose-300 hover:text-rose-600 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h4 id="itemModalTitle" class="text-xl font-serif font-bold text-rose-950 mb-1">Agregar Actividad</h4>
+            <p id="itemModalSubtitle" class="text-xs text-rose-600 mb-4">Categoría: Parciales (33%)</p>
+
+            <form id="itemForm" class="space-y-3.5">
+                <input type="hidden" id="formItemSubjectId">
+                <input type="hidden" id="formItemCategory">
+                <input type="hidden" id="formItemIndex">
+
+                <div>
+                    <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Título o Detalle *</label>
+                    <input type="text" id="formItemName" required placeholder="Ej. Parcial 1, Taller 3, Informe Lab..." class="w-full px-3.5 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-rose-800 uppercase tracking-wider mb-1">Calificación (0 a 100)</label>
+                    <input type="number" step="0.1" min="0" max="100" id="formItemScore" placeholder="Vacío si aún no la recibes" class="w-full px-3.5 py-2 rounded-xl border border-rose-200 focus:ring-2 focus:ring-rose-400 focus:outline-none text-xs sm:text-sm">
+                    <span class="text-[10px] text-stone-400 mt-1 block">Déjalo en blanco si está programado para el futuro.</span>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-rose-100">
+                    <button type="button" id="btnCancelItem" class="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-medium">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-md shadow-rose-300">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Floating Alert -->
+    <div id="toastMessage" class="fixed bottom-6 right-6 bg-rose-950/90 backdrop-blur-md text-white text-xs font-medium py-3 px-5 rounded-2xl shadow-xl border border-rose-800/50 flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <span id="toastIcon">🌸</span>
+        <span id="toastText">Acción completada con éxito</span>
+    </div>
+
+    <div id="cloudModal" class="fixed inset-0 bg-stone-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-200 relative">
+            <button id="btnCloseCloudModal" class="absolute top-5 right-5 text-rose-300 hover:text-rose-600 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="flex items-center gap-2.5 mb-2">
+                <span class="p-2 rounded-2xl bg-rose-100 text-rose-700 text-lg">☁️</span>
+                <h3 class="text-xl font-serif font-bold text-rose-950">Sincronización en la Nube</h3>
+            </div>
+            <p class="text-xs text-rose-700/80 mb-4">
+                Tus notas se guardan automáticamente en este dispositivo cada vez que haces un cambio. Si inicias sesión con Google, también se guardan en la nube y aparecen en tu celular y en cualquier otra computadora donde entres con la misma cuenta.
+            </p>
+
+            <div class="space-y-4">
+                <div id="cloudNotConfigured" class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-1.5">
+                    <label class="block text-[11px] font-bold text-amber-800 uppercase tracking-wider">Nube sin configurar</label>
+                    <p class="text-[11px] text-amber-900 leading-snug">
+                        Tus notas <strong>sí se guardan</strong> en este navegador, pero todavía no se comparten con otros dispositivos. Para activarlo, completa el archivo <code class="font-mono bg-white px-1 rounded">firebase-config.js</code> del repositorio (ver instrucciones en el README).
+                    </p>
+                </div>
+
+                <div id="cloudLoggedOut" class="hidden p-3.5 rounded-2xl bg-petal border border-rose-200 space-y-2.5">
+                    <label class="block text-[11px] font-bold text-rose-800 uppercase tracking-wider">Inicia sesión para sincronizar</label>
+                    <button id="btnGoogleLogin" class="w-full px-4 py-2.5 bg-white border border-rose-300 hover:bg-rose-50 text-rose-900 rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+                        Iniciar sesión con Google
+                    </button>
+                    <p class="text-[10px] text-stone-500 leading-tight">Usa siempre la misma cuenta en todos tus dispositivos. Solo tú puedes ver tus notas.</p>
+                </div>
+
+                <div id="cloudLoggedIn" class="hidden p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+                    <label class="block text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Sesión activa</label>
+                    <div class="flex items-center justify-between gap-2">
+                        <span id="cloudUserEmail" class="text-xs font-semibold text-emerald-900 truncate"></span>
+                        <button id="btnLogout" class="px-3 py-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-semibold shrink-0">
+                            Cerrar sesión
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-stone-500 leading-tight">Cada cambio se sube a la nube en menos de un segundo.</p>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200/80">
+                    <p class="text-[10px] text-stone-600 leading-snug">
+                        💾 <strong>Respaldo:</strong> el botón de descarga (junto a “Recargar UDELAS”) guarda una copia .json de tus notas; el botón de subir la vuelve a cargar.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-5 mt-4 border-t border-rose-100">
+                <button type="button" id="btnDoneCloudModal" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase se carga de forma dinámica dentro de initCloudSync(),
+        // así la app sigue funcionando aunque no haya internet o no esté configurada la nube.
+        const FIREBASE_VERSION = '11.6.1';
+
+        const STORAGE_KEY = 'udelas_biomedica_planner_v5';
+
+        // Study plan structure: 5 Years, 10 Semesters, 4 Summers, 72 Subjects, 249 Credits
+        const defaultStudyPlan = {
+            activeYear: 1,
+            activePeriod: 'sem2',
+            currentView: 'detailed',
+            years: [
+                {
+                    yearNum: 1,
+                    hasSummer: false,
+                    periods: {
+                        sem1: {
+                            name: 'Primer Semestre',
+                            subjects: [
+                                { id: 's_5789', code: '5789', name: 'Cálculo diferencial', teacher: '', credits: 5, mode: 'direct', finalScore: 85, finalLetter: 'B', notes: 'Aprobado con nota B' },
+                                { id: 's_5790', code: '5790', name: 'Geometría Analítica', teacher: '', credits: 3, mode: 'direct', finalScore: 95, finalLetter: 'A', notes: 'Aprobado con nota A' },
+                                { id: 's_5798', code: '5798', name: 'Física Mecánica (Lab)', teacher: '', credits: 5, mode: 'direct', finalScore: 75, finalLetter: 'C', notes: 'Aprobado con nota C' },
+                                { id: 's_4761', code: '4761', name: 'Inglés 448A', teacher: '', credits: 4, mode: 'direct', finalScore: 96, finalLetter: 'A', notes: 'Aprobado con nota A' },
+                                { id: 's_5803', code: '5803', name: 'Español', teacher: '', credits: 3, mode: 'direct', finalScore: 94, finalLetter: 'A', notes: 'Aprobado con nota A' },
+                                { id: 's_5821', code: '5821', name: 'Historia de Panamá', teacher: '', credits: 3, mode: 'direct', finalScore: 98, finalLetter: 'A', notes: 'Aprobado con nota A' },
+                                { id: 's_5794', code: '5794', name: 'Práctica Universitaria I', teacher: '', credits: 3, mode: 'direct', finalScore: 97, finalLetter: 'A', notes: 'Aprobado con nota A' },
+                                { id: 's_1_taller', code: '1', name: 'Taller', teacher: '', credits: 0, mode: 'direct', finalScore: 100, finalLetter: 'A', notes: 'Aprobado con nota A' }
+                            ]
+                        },
+                        sem2: {
+                            name: 'Segundo Semestre',
+                            subjects: [
+                                {
+                                    id: 's_5796', code: '5796', name: 'Cálculo Integral', teacher: '', credits: 5, mode: 'breakdown',
+                                    parciales: [{ name: 'Primer Parcial', score: null }, { name: 'Segundo Parcial', score: null }],
+                                    tareas: [{ name: 'Taller de Métodos de Integración', score: null }, { name: 'Asignación Riemann', score: null }],
+                                    examen: { name: 'Examen Semestral', score: null }, notes: 'Ponderación: 33% Parciales, 33% Tareas, 34% Semestral'
+                                },
+                                {
+                                    id: 's_5797', code: '5797', name: 'Diseño Técnico de Ingeniería (Lab)', teacher: '', credits: 3, mode: 'breakdown',
+                                    parciales: [{ name: 'Parcial Práctico 1', score: null }],
+                                    tareas: [{ name: 'Láminas y Dibujo CAD', score: null }],
+                                    examen: { name: 'Proyecto Final', score: null }, notes: ''
+                                },
+                                {
+                                    id: 's_5808', code: '5808', name: 'Física Electromagnética (Lab)', teacher: '', credits: 4, mode: 'breakdown',
+                                    parciales: [{ name: 'Parcial Ley de Coulomb y Campo', score: null }],
+                                    tareas: [{ name: 'Informes de Laboratorio', score: null }],
+                                    examen: { name: 'Examen Semestral', score: null }, notes: ''
+                                },
+                                {
+                                    id: 's_4762', code: '4762', name: 'Inglés 448B', teacher: '', credits: 4, mode: 'breakdown',
+                                    parciales: [{ name: 'Midterm Exam', score: null }],
+                                    tareas: [{ name: 'Worksheets & Essays', score: null }],
+                                    examen: { name: 'Final Exam', score: null }, notes: ''
+                                },
+                                {
+                                    id: 's_5858', code: '5858', name: 'Bioética', teacher: '', credits: 3, mode: 'breakdown',
+                                    parciales: [{ name: 'Parcial Casos de Bioética', score: null }],
+                                    tareas: [{ name: 'Ensayos y Debates', score: null }],
+                                    examen: { name: 'Ensayo Semestral', score: null }, notes: ''
+                                },
+                                {
+                                    id: 's_5793', code: '5793', name: 'Química Analítica (Lab)', teacher: '', credits: 3, mode: 'breakdown',
+                                    parciales: [{ name: 'Parcial Volumetría', score: null }],
+                                    tareas: [{ name: 'Reportes y Bitácora', score: null }],
+                                    examen: { name: 'Examen Semestral', score: null }, notes: ''
+                                },
+                                {
+                                    id: 's_5802', code: '5802', name: 'Práctica Universitaria II', teacher: '', credits: 2, mode: 'breakdown',
+                                    parciales: [],
+                                    tareas: [{ name: 'Bitácora e Informes', score: null }],
+                                    examen: { name: 'Evaluación de Desempeño', score: null }, notes: ''
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    yearNum: 2,
+                    hasSummer: true,
+                    periods: {
+                        sem1: {
+                            name: 'Tercer Semestre',
+                            subjects: [
+                                { id: 's_5806', code: '5806', name: 'Ecuaciones diferenciales', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5807', code: '5807', name: 'Fundamentos de Programación (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5801', code: '5801', name: 'Bioquímica (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7174', code: '7174', name: 'Física de Ondas y Radiaciones (Lab)', teacher: '', credits: 5, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7175', code: '7175', name: 'Análisis de Circuitos I (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_4764', code: '4764', name: 'Inglés 449B', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5812', code: '5812', name: 'Práctica Universitaria III', teacher: '', credits: 2, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        sem2: {
+                            name: 'Cuarto Semestre',
+                            subjects: [
+                                { id: 's_5823', code: '5823', name: 'Matemática Avanzada', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5824', code: '5824', name: 'Lenguaje de Programación (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5792', code: '5792', name: 'Biología Celular y Molecular (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5828', code: '5828', name: 'Circuitos Electrónicos I (Lab)', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7176', code: '7176', name: 'Análisis de Circuitos II (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5827', code: '5827', name: 'Equipo Biomédico I', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5819', code: '5819', name: 'Práctica Universitaria IV', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        summer: {
+                            name: 'Verano (Año 2)',
+                            subjects: [
+                                { id: 's_5805', code: '5805', name: 'Geografía de Panamá', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_4763', code: '4763', name: 'Inglés 449A', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_6727', code: '6727', name: 'Electiva: Primeros Auxilios', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        }
+                    }
+                },
+                {
+                    yearNum: 3,
+                    hasSummer: true,
+                    periods: {
+                        sem1: {
+                            name: 'Quinto Semestre',
+                            subjects: [
+                                { id: 's_5813', code: '5813', name: 'Análisis Numérico (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5830', code: '5830', name: 'Programación Avanzada (Bases de Datos) Lab', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7178', code: '7178', name: 'Biología de Sistemas (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5835', code: '5835', name: 'Circuitos Electrónicos II (Lab)', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7179', code: '7179', name: 'Biofísica (Lab)', teacher: '', credits: 5, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_4766', code: '4766', name: 'Inglés 450B', teacher: '', credits: 2, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5834', code: '5834', name: 'Equipos Biomédicos II', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        sem2: {
+                            name: 'Sexto Semestre',
+                            subjects: [
+                                { id: 's_5804', code: '5804', name: 'Probabilidad y Estadística', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5841', code: '5841', name: 'Diseño Asistido por Computadora (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7180', code: '7180', name: 'Circuitos Digitales (Lab)', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5848', code: '5848', name: 'Protección Radiológica', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5833', code: '5833', name: 'Materiales y Biomateriales', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5843', code: '5843', name: 'Equipos Biomédicos III', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7181', code: '7181', name: 'Fisiología Biomédica (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        summer: {
+                            name: 'Verano (Año 3)',
+                            subjects: [
+                                { id: 's_4765', code: '4765', name: 'Inglés 450A', teacher: '', credits: 2, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7177', code: '7177', name: 'Práctica V', teacher: '', credits: 6, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        }
+                    }
+                },
+                {
+                    yearNum: 4,
+                    hasSummer: true,
+                    periods: {
+                        sem1: {
+                            name: 'Séptimo Semestre',
+                            subjects: [
+                                { id: 's_7184', code: '7184', name: 'Metodología de Investigación I', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5854', code: '5854', name: 'Sistema de Información Hospitalaria', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7185', code: '7185', name: 'Telemática (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7186', code: '7186', name: 'Circuitos Digitales Programables (Lab)', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7187', code: '7187', name: 'Control y Automatización I (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5842', code: '5842', name: 'Diseño de Dispositivos Médicos I (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5850', code: '5850', name: 'Electrónica de Potencia y Actuadores (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        sem2: {
+                            name: 'Octavo Semestre',
+                            subjects: [
+                                { id: 's_7188', code: '7188', name: 'Metodología de la Investigación II', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_opt1', code: 'OPT1', name: 'Optativa I (Patentes / Biomédica)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5849', code: '5849', name: 'Diseño de Instalaciones Hospitalarias', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7189', code: '7189', name: 'Control y Automatización II (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5847', code: '5847', name: 'Diseño de Dispositivos Médicos II (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5838', code: '5838', name: 'Educación Ambiental y Gestión de Riesgos', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7190', code: '7190', name: 'Tratamiento Digital de Bioseñales (Lab)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        summer: {
+                            name: 'Verano (Año 4)',
+                            subjects: [
+                                { id: 's_7182', code: '7182', name: 'Seguridad y Salud Ocupacional en el Trabajo', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7183', code: '7183', name: 'Práctica Universitaria VI', teacher: '', credits: 6, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        }
+                    }
+                },
+                {
+                    yearNum: 5,
+                    hasSummer: true,
+                    periods: {
+                        sem1: {
+                            name: 'Noveno Semestre',
+                            subjects: [
+                                { id: 's_5856', code: '5856', name: 'Evaluación y Gestión de Proyectos', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7192', code: '7192', name: 'Inteligencia Artificial en Sistemas Biomédicos', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5853', code: '5853', name: 'Estándares y Regulaciones Biomédicas', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5860', code: '5860', name: 'Administración de la Ingeniería Biomédica', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_5822', code: '5822', name: 'Educación para Atención a la Diversidad', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_7193', code: '7193', name: 'Procesamiento de Imágenes Médicas', teacher: '', credits: 4, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' },
+                                { id: 's_opt2', code: 'OPT2', name: 'Optativa II (Bioinstrumentación / Nano)', teacher: '', credits: 3, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Examen Semestral', score: null }, notes: '' }
+                            ]
+                        },
+                        sem2: {
+                            name: 'Décimo Semestre',
+                            subjects: [
+                                { id: 's_5862', code: '5862', name: 'Trabajo de Grado', teacher: '', credits: 8, mode: 'breakdown', parciales: [], tareas: [{ name: 'Avance de Tesis / Proyecto', score: null }], examen: { name: 'Sustentación de Grado', score: null }, notes: 'Culminación y sustentación del proyecto de grado' }
+                            ]
+                        },
+                        summer: {
+                            name: 'Verano (Año 5)',
+                            subjects: [
+                                { id: 's_7191', code: '7191', name: 'Práctica Universitaria VII', teacher: '', credits: 6, mode: 'breakdown', parciales: [], tareas: [], examen: { name: 'Evaluación de Práctica', score: null }, notes: '' }
+                            ]
+                        }
+                    }
+                }
+            ]
+        };
+
+        let appData = null;
+
+        // ---------- Estado de la nube ----------
+        let fb = null;              // módulos de Firebase cargados dinámicamente
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let unsubscribeCloud = null;
+        let saveTimeout = null;
+        let pendingCloudSave = false;
+        let cloudReady = false;
+
+        // Campos que son solo de "navegación" en cada dispositivo (no se sincronizan)
+        const UI_KEYS = ['activeYear', 'activePeriod', 'currentView'];
+
+        async function initCloudSync() {
+            let config = null;
+            try {
+                const mod = await import('./firebase-config.js');
+                config = mod.firebaseConfig;
+            } catch (e) {
+                console.warn('No se encontró firebase-config.js', e);
+            }
+
+            if (!config || !config.apiKey || config.apiKey.startsWith('PEGA_')) {
+                setCloudStatus('local', 'Guardado en este dispositivo');
+                updateCloudModal();
+                return;
+            }
+
+            setCloudStatus('connecting', 'Conectando nube...');
+            try {
+                const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
+                const [appMod, authMod, fsMod] = await Promise.all([
+                    import(`${base}/firebase-app.js`),
+                    import(`${base}/firebase-auth.js`),
+                    import(`${base}/firebase-firestore.js`)
+                ]);
+                fb = { ...appMod, ...authMod, ...fsMod };
+
+                const app = fb.initializeApp(config);
+                auth = fb.getAuth(app);
+                db = fb.getFirestore(app);
+                cloudReady = true;
+
+                // Completa un inicio de sesión por redirección (móviles que bloquean ventanas emergentes)
+                fb.getRedirectResult(auth).catch(err => console.warn('Redirect result:', err));
+
+                fb.onAuthStateChanged(auth, async (user) => {
+                    currentUser = user;
+                    if (unsubscribeCloud) { unsubscribeCloud(); unsubscribeCloud = null; }
+                    updateCloudModal();
+                    if (user) {
+                        await syncOnLogin();
+                    } else {
+                        setCloudStatus('local', 'Sin sesión • solo este dispositivo');
+                    }
+                });
+            } catch (err) {
+                console.error('Cloud init error:', err);
+                setCloudStatus('local', 'Sin conexión • guardado local');
+                updateCloudModal();
+            }
+        }
+
+        function userDocRef() {
+            return fb.doc(db, 'users', currentUser.uid, 'data', 'notas');
+        }
+
+        // Al iniciar sesión: gana la versión más reciente (la de la nube o la de este dispositivo)
+        async function syncOnLogin() {
+            setCloudStatus('connecting', 'Sincronizando...');
+            try {
+                const snap = await fb.getDoc(userDocRef());
+                const localTime = appData.updatedAt || 0;
+
+                if (snap.exists() && snap.data()?.payload) {
+                    const cloudTime = snap.data().updatedAt || 0;
+                    if (cloudTime >= localTime) {
+                        applyCloudPayload(snap.data().payload);
+                    } else {
+                        await pushToCloudNow();
+                    }
+                } else {
+                    await pushToCloudNow();
+                }
+                listenToCloudData();
+                setCloudStatus('synced', 'Nube sincronizada');
+            } catch (err) {
+                console.error('Sync error:', err);
+                setCloudStatus('error', 'Error de sincronización');
+            }
+        }
+
+        function listenToCloudData() {
+            unsubscribeCloud = fb.onSnapshot(userDocRef(), (snapshot) => {
+                // Ignora el eco de nuestros propios cambios
+                if (snapshot.metadata.hasPendingWrites) return;
+                if (!snapshot.exists()) return;
+                const data = snapshot.data();
+                if (data && data.payload && (data.updatedAt || 0) > (appData.updatedAt || 0)) {
+                    applyCloudPayload(data.payload);
+                    showToast('📲 Cambios recibidos de otro dispositivo', '☁️');
+                }
+            }, (error) => {
+                console.error('Cloud listener error:', error);
+                setCloudStatus('error', 'Error de sincronización');
+            });
+        }
+
+        function applyCloudPayload(payload) {
+            try {
+                const parsed = JSON.parse(payload);
+                if (!parsed || !Array.isArray(parsed.years)) return;
+                const ui = {};
+                UI_KEYS.forEach(k => ui[k] = appData[k]);
+                appData = parsed;
+                UI_KEYS.forEach(k => { if (ui[k] !== undefined) appData[k] = ui[k]; });
+                saveLocally();
+                updateViewDisplay();
+                renderSubjects();
+            } catch (e) {
+                console.error('Error parsing cloud payload', e);
+            }
+        }
+
+        function cloudPayload() {
+            return {
+                payload: JSON.stringify(appData),
+                updatedAt: appData.updatedAt || Date.now()
+            };
+        }
+
+        async function pushToCloudNow() {
+            if (!cloudReady || !currentUser) return;
+            clearTimeout(saveTimeout);
+            pendingCloudSave = false;
+            await fb.setDoc(userDocRef(), cloudPayload());
+        }
+
+        function pushToCloud() {
+            if (!cloudReady || !currentUser) return;
+            setCloudStatus('saving', 'Guardando cambios...');
+            pendingCloudSave = true;
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                try {
+                    await pushToCloudNow();
+                    setCloudStatus('synced', 'Nube sincronizada');
+                } catch (err) {
+                    console.error('Push to cloud error:', err);
+                    setCloudStatus('error', 'Error al guardar en la nube');
+                }
+            }, 600);
+        }
+
+        // Si se cierra la pestaña con un guardado pendiente, se envía de inmediato
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && pendingCloudSave) {
+                pushToCloudNow().catch(() => {});
+            }
+        });
+
+        async function signInWithGoogle() {
+            if (!cloudReady) {
+                showToast('La nube aún no está configurada', '⚠️');
+                return;
+            }
+            const provider = new fb.GoogleAuthProvider();
+            try {
+                await fb.signInWithPopup(auth, provider);
+                showToast('✨ Sesión iniciada');
+            } catch (err) {
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+                    await fb.signInWithRedirect(auth, provider);
+                } else if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+                    console.error('Login error:', err);
+                    showToast('No se pudo iniciar sesión: ' + err.code, '❌');
+                }
+            }
+        }
+
+        async function signOutCloud() {
+            if (!auth) return;
+            if (pendingCloudSave) { try { await pushToCloudNow(); } catch (e) {} }
+            await fb.signOut(auth);
+            showToast('Sesión cerrada. Tus notas siguen guardadas en este dispositivo.', '👋');
+        }
+
+        function updateCloudModal() {
+            const notConfigured = document.getElementById('cloudNotConfigured');
+            const loggedOut = document.getElementById('cloudLoggedOut');
+            const loggedIn = document.getElementById('cloudLoggedIn');
+            const emailEl = document.getElementById('cloudUserEmail');
+            if (!notConfigured) return;
+
+            notConfigured.classList.toggle('hidden', cloudReady);
+            loggedOut.classList.toggle('hidden', !cloudReady || !!currentUser);
+            loggedIn.classList.toggle('hidden', !cloudReady || !currentUser);
+            if (currentUser && emailEl) emailEl.textContent = currentUser.email || currentUser.displayName || 'Cuenta de Google';
+        }
+
+        function setCloudStatus(state, label) {
+            const badge = document.getElementById('cloudStatusBadge');
+            const dot = document.getElementById('cloudStatusDot');
+            const text = document.getElementById('cloudStatusText');
+            if (!badge || !dot || !text) return;
+
+            text.textContent = label;
+            if (state === 'synced') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+                badge.className = 'px-3 py-2 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition';
+            } else if (state === 'saving') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+                badge.className = 'px-3 py-2 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition';
+            } else if (state === 'connecting') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse';
+                badge.className = 'px-3 py-2 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition';
+            } else if (state === 'error') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500';
+                badge.className = 'px-3 py-2 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition';
+            } else {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-400';
+                badge.className = 'px-3 py-2 rounded-2xl bg-stone-50 border border-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition';
+            }
+        }
+
+        // ---------- Guardado local (siempre activo) ----------
+        function loadAppData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.years) && parsed.years.length === 5) {
+                        appData = parsed;
+                    } else {
+                        appData = JSON.parse(JSON.stringify(defaultStudyPlan));
+                        mergeSavedData(parsed);
+                        saveLocally();
+                    }
+                } else {
+                    appData = JSON.parse(JSON.stringify(defaultStudyPlan));
+                    saveLocally();
+                }
+            } catch (err) {
+                console.error("Error loading app data:", err);
+                appData = JSON.parse(JSON.stringify(defaultStudyPlan));
+            }
+
+            if (!appData.activeYear) appData.activeYear = 1;
+            if (!appData.activePeriod) appData.activePeriod = 'sem2';
+            if (!appData.currentView) appData.currentView = 'detailed';
+        }
+
+        function mergeSavedData(source) {
+            if (!source || !Array.isArray(source.years)) return;
+            source.years.forEach(srcYear => {
+                const targetYear = appData.years.find(y => y.yearNum === srcYear.yearNum);
+                if (targetYear && srcYear.periods) {
+                    Object.keys(srcYear.periods).forEach(pKey => {
+                        if (targetYear.periods[pKey] && Array.isArray(srcYear.periods[pKey].subjects)) {
+                            srcYear.periods[pKey].subjects.forEach(srcSub => {
+                                const targetSub = targetYear.periods[pKey].subjects.find(s => s.id === srcSub.id || s.code === srcSub.code);
+                                if (targetSub) {
+                                    if (srcSub.mode) targetSub.mode = srcSub.mode;
+                                    if (srcSub.finalScore !== undefined) targetSub.finalScore = srcSub.finalScore;
+                                    if (srcSub.finalLetter !== undefined) targetSub.finalLetter = srcSub.finalLetter;
+                                    if (srcSub.parciales) targetSub.parciales = srcSub.parciales;
+                                    if (srcSub.tareas) targetSub.tareas = srcSub.tareas;
+                                    if (srcSub.examen) targetSub.examen = srcSub.examen;
+                                    if (srcSub.notes) targetSub.notes = srcSub.notes;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Cambios reales de notas/materias: se guardan local + nube
+        function saveAppData() {
+            appData.updatedAt = Date.now();
+            saveLocally();
+            pushToCloud();
+        }
+
+        // Cambios de navegación (año, semestre, vista): solo en este dispositivo
+        function saveUiState() {
+            saveLocally();
+        }
+
+        function saveLocally() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch(e) {
+                console.error("Storage error", e);
+                showToast('No se pudo guardar en este navegador', '⚠️');
+            }
+        }
+
+        function isApproved(m) {
+            if (m.isDirect) return m.isPassing;
+            return m.completedWeight === 100 && m.totalAccumulated >= 71;
+        }
+        function letterToPoints(letter) {
+            if (!letter) return 0.0;
+            switch(String(letter).toUpperCase().trim()) {
+                case 'A': return 3.0;
+                case 'B': return 2.0;
+                case 'C': return 1.0;
+                default: return 0.0;
+            }
+        }
+
+        function scoreToLetter(score) {
+            if (score >= 91) return 'A';
+            if (score >= 81) return 'B';
+            if (score >= 71) return 'C';
+            if (score >= 61) return 'D';
+            return 'F';
+        }
+
+        function calculateSubjectScores(sub) {
+            if (sub.mode === 'direct') {
+                const s = parseFloat(sub.finalScore) || 0;
+                const letter = (sub.finalLetter || scoreToLetter(s)).toUpperCase();
+                return {
+                    isDirect: true,
+                    finalScore: s,
+                    letter: letter,
+                    isPassing: ['A', 'B', 'C'].includes(letter) || s >= 71,
+                    hasEvaluations: true
+                };
+            }
+
+            let parcialSum = 0, parcialCount = 0;
+            if (sub.parciales && sub.parciales.length > 0) {
+                sub.parciales.forEach(p => {
+                    if (p.score !== null && p.score !== undefined && p.score !== '') {
+                        parcialSum += parseFloat(p.score);
+                        parcialCount++;
+                    }
+                });
+            }
+            const parcialAvg = parcialCount > 0 ? (parcialSum / parcialCount) : null;
+            const parcialWeightScore = parcialAvg !== null ? (parcialAvg * 0.33) : 0;
+            const parcialWeightCompleted = parcialAvg !== null ? 33 : 0;
+
+            let tareaSum = 0, tareaCount = 0;
+            if (sub.tareas && sub.tareas.length > 0) {
+                sub.tareas.forEach(t => {
+                    if (t.score !== null && t.score !== undefined && t.score !== '') {
+                        tareaSum += parseFloat(t.score);
+                        tareaCount++;
+                    }
+                });
+            }
+            const tareaAvg = tareaCount > 0 ? (tareaSum / tareaCount) : null;
+            const tareaWeightScore = tareaAvg !== null ? (tareaAvg * 0.33) : 0;
+            const tareaWeightCompleted = tareaAvg !== null ? 33 : 0;
+
+            const examenScore = (sub.examen && sub.examen.score !== null && sub.examen.score !== undefined && sub.examen.score !== '') 
+                ? parseFloat(sub.examen.score) : null;
+            const examenWeightScore = examenScore !== null ? (examenScore * 0.34) : 0;
+            const examenWeightCompleted = examenScore !== null ? 34 : 0;
+
+            const totalAccumulated = parcialWeightScore + tareaWeightScore + examenWeightScore;
+            const completedWeight = parcialWeightCompleted + tareaWeightCompleted + examenWeightCompleted;
+            const remainingWeight = 100 - completedWeight;
+
+            let neededInRemaining = null;
+            if (remainingWeight > 0) {
+                const deficit = 71 - totalAccumulated;
+                neededInRemaining = deficit <= 0 ? 0 : (deficit / (remainingWeight / 100));
+            }
+
+            const currentScoreNormalized = completedWeight > 0 ? (totalAccumulated / (completedWeight / 100)) : totalAccumulated;
+            const letter = scoreToLetter(completedWeight === 100 ? totalAccumulated : currentScoreNormalized);
+
+            return {
+                isDirect: false,
+                parcialAvg,
+                parcialWeightScore,
+                tareaAvg,
+                tareaWeightScore,
+                examenScore,
+                examenWeightScore,
+                totalAccumulated,
+                completedWeight,
+                remainingWeight,
+                neededInRemaining,
+                letter: letter,
+                isPassing: totalAccumulated >= 71 || (remainingWeight > 0 && (neededInRemaining === null || neededInRemaining <= 100)),
+                hasEvaluations: (parcialCount > 0 || tareaCount > 0 || examenScore !== null)
+            };
+        }
+
+        function renderSelectors() {
+            const yearTabs = document.getElementById('yearTabsContainer');
+            if (!yearTabs) return;
+
+            yearTabs.innerHTML = appData.years.map(y => {
+                const isActive = y.yearNum === appData.activeYear;
+                return `
+                    <button onclick="window.switchYear(${y.yearNum})" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                        isActive 
+                        ? 'bg-rose-500 text-white shadow-sm shadow-rose-300' 
+                        : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50'
+                    }">
+                        Año ${y.yearNum}
+                    </button>
+                `;
+            }).join('');
+
+            const currentYearObj = appData.years.find(y => y.yearNum === appData.activeYear) || appData.years[0];
+            const periodTabs = document.getElementById('periodTabsContainer');
+            if (!periodTabs) return;
+
+            const availablePeriods = [
+                { id: 'sem1', label: '1er Semestre' },
+                { id: 'sem2', label: '2do Semestre' }
+            ];
+
+            if (currentYearObj.hasSummer) {
+                availablePeriods.push({ id: 'summer', label: '☀️ Verano' });
+            }
+
+            if (!currentYearObj.periods[appData.activePeriod]) {
+                appData.activePeriod = 'sem1';
+                saveUiState();
+            }
+
+            periodTabs.innerHTML = availablePeriods.map(p => {
+                const isActive = p.id === appData.activePeriod;
+                return `
+                    <button onclick="window.switchPeriod('${p.id}')" class="px-4 py-2 rounded-2xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+                        isActive 
+                        ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-300' 
+                        : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50'
+                    }">
+                        ${p.label}
+                    </button>
+                `;
+            }).join('');
+
+            const yearNotice = document.getElementById('yearNotice');
+            if (yearNotice) {
+                if (currentYearObj.yearNum === 1 && !currentYearObj.hasSummer) {
+                    yearNotice.textContent = '✨ 1er Año: Semestre I consolidado y Semestre II activo.';
+                } else {
+                    yearNotice.textContent = `📚 Año ${currentYearObj.yearNum}: Incluye 2 Semestres y Período de Verano.`;
+                }
+            }
+        }
+
+        function calculateGlobalStats() {
+            const currentYear = appData.years.find(y => y.yearNum === appData.activeYear);
+            const currentPeriod = currentYear ? currentYear.periods[appData.activePeriod] : null;
+            const subjects = currentPeriod ? currentPeriod.subjects : [];
+
+            let periodPointsSum = 0;
+            let periodCredits = 0;
+            let passingCount = 0;
+
+            subjects.forEach(sub => {
+                const creds = parseFloat(sub.credits) || 0;
+                const m = calculateSubjectScores(sub);
+                const score = m.isDirect ? m.finalScore : m.totalAccumulated;
+
+                periodCredits += creds;
+                periodPointsSum += (score * creds);
+
+                if (isApproved(m)) passingCount++;
+            });
+
+            const periodAvg = periodCredits > 0 ? (periodPointsSum / periodCredits) : 0;
+            const elPeriodAvg = document.getElementById('statPeriodAvg');
+            const elPeriodCreds = document.getElementById('statPeriodCredits');
+            const elPassingRatio = document.getElementById('statPassingRatio');
+            const elBadge = document.getElementById('statPeriodBadge');
+
+            if (elPeriodAvg) elPeriodAvg.textContent = periodAvg.toFixed(2);
+            if (elPeriodCreds) elPeriodCreds.textContent = periodCredits;
+            if (elPassingRatio) elPassingRatio.textContent = `${passingCount} / ${subjects.length}`;
+
+            if (elBadge) {
+                if (periodAvg >= 91) {
+                    elBadge.textContent = 'Excelente (A) 🌸';
+                    elBadge.className = 'mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                } else if (periodAvg >= 81) {
+                    elBadge.textContent = 'Muy Bueno (B) ✨';
+                    elBadge.className = 'mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200';
+                } else if (periodAvg >= 71) {
+                    elBadge.textContent = 'Aprobatorio (C) 🌷';
+                    elBadge.className = 'mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200';
+                } else {
+                    elBadge.textContent = 'En curso / Pendiente';
+                    elBadge.className = 'mt-2 inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-700';
+                }
+            }
+
+            let totalCumulativeCredits = 0;
+            let totalGradePoints = 0;
+            let totalApprovedCredits = 0;
+
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    p.subjects.forEach(sub => {
+                        const creds = parseFloat(sub.credits) || 0;
+                        const m = calculateSubjectScores(sub);
+                        if (m.hasEvaluations || m.isDirect) {
+                            if (creds > 0) {
+                                totalCumulativeCredits += creds;
+                                totalGradePoints += (letterToPoints(m.letter) * creds);
+                            }
+                            if (isApproved(m)) {
+                                totalApprovedCredits += creds;
+                            }
+                        }
+                    });
+                });
+            });
+
+            const indexVal = totalCumulativeCredits > 0 ? (totalGradePoints / totalCumulativeCredits) : 0;
+            const elCumulIndex = document.getElementById('statCumulativeIndex');
+            const elCreditsEarned = document.getElementById('statCreditsEarned');
+            const sheetBadge = document.getElementById('sheetProgressBadge');
+
+            if (elCumulIndex) elCumulIndex.textContent = indexVal.toFixed(2);
+            if (elCreditsEarned) elCreditsEarned.textContent = `Créditos aprobados: ${totalApprovedCredits} / 249`;
+            if (sheetBadge) sheetBadge.textContent = `${totalApprovedCredits} / 249 Cr Aprobados`;
+        }
+
+        function renderSubjects() {
+            renderSelectors();
+            calculateGlobalStats();
+
+            if (appData.currentView === 'global') {
+                renderGlobalSheet();
+                return;
+            }
+
+            const container = document.getElementById('subjectsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            const currentYear = appData.years.find(y => y.yearNum === appData.activeYear);
+            const currentPeriod = currentYear ? currentYear.periods[appData.activePeriod] : null;
+
+            if (!currentPeriod || !currentPeriod.subjects || currentPeriod.subjects.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            let filtered = currentPeriod.subjects.filter(s => {
+                return s.name.toLowerCase().includes(searchQuery) || (s.code && s.code.toLowerCase().includes(searchQuery));
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            container.innerHTML = '';
+
+            filtered.forEach(sub => {
+                const metrics = calculateSubjectScores(sub);
+                const card = document.createElement('div');
+                card.className = "bg-white/90 backdrop-blur-md rounded-3xl border border-rose-200/80 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden";
+
+                if (sub.mode === 'direct') {
+                    const letterColor = metrics.letter === 'A' 
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                        : (metrics.letter === 'B' ? 'bg-pink-100 text-pink-800 border-pink-300' : 'bg-amber-100 text-amber-800 border-amber-300');
+
+                    card.innerHTML = `
+                        <div class="p-5 sm:p-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-rose-100">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                        ${sub.code ? `<span class="px-2.5 py-0.5 rounded-lg bg-rose-100 text-rose-800 text-xs font-mono font-bold">${escapeHtml(sub.code)}</span>` : ''}
+                                        <h3 class="text-xl sm:text-2xl font-serif font-bold text-rose-950">${escapeHtml(sub.name)}</h3>
+                                        <span class="text-xs px-2.5 py-0.5 rounded-full font-medium bg-rose-50 text-rose-700">${sub.credits} Créditos</span>
+                                    </div>
+                                    <p class="text-xs text-stone-500">
+                                        Modalidad: <strong class="text-rose-700">Nota Directa Consolidada</strong>
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <span class="text-[10px] uppercase font-bold text-rose-500 tracking-wider block">Calificación</span>
+                                        <div class="flex items-center gap-2 justify-end">
+                                            <span class="text-3xl font-extrabold text-rose-950">${metrics.finalScore}</span>
+                                            <span class="px-3 py-1 rounded-xl text-lg font-black border ${letterColor}">${metrics.letter}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 border-l border-rose-100 pl-2">
+                                        <button onclick="window.openEditSubjectModal('${sub.id}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl" title="Editar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <button onclick="window.deleteSubject('${sub.id}')" class="p-2 text-rose-300 hover:text-rose-700 hover:bg-rose-50 rounded-xl" title="Eliminar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-stone-600 bg-rose-50/50 p-3 rounded-2xl border border-rose-100/60 flex items-center justify-between">
+                                <span>💬 <em>${escapeHtml(sub.notes || 'Asignatura con calificación final registrada.')}</em></span>
+                                <button onclick="window.openEditSubjectModal('${sub.id}')" class="text-[11px] font-semibold text-rose-600 hover:underline shrink-0 ml-2">Cambiar nota</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const parcialRows = (sub.parciales && sub.parciales.length > 0)
+                        ? sub.parciales.map((p, idx) => renderItemRow(sub.id, 'parciales', idx, p.name, p.score)).join('')
+                        : `<p class="text-[11px] text-rose-400 italic text-center py-2">Sin parciales registrados</p>`;
+
+                    const tareaRows = (sub.tareas && sub.tareas.length > 0)
+                        ? sub.tareas.map((t, idx) => renderItemRow(sub.id, 'tareas', idx, t.name, t.score)).join('')
+                        : `<p class="text-[11px] text-rose-400 italic text-center py-2">Sin tareas/talleres registrados</p>`;
+
+                    let neededBanner = '';
+                    if (metrics.completedWeight < 100) {
+                        if (metrics.totalAccumulated >= 71) {
+                            neededBanner = `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">🎉 ¡Alcanzaste la nota mínima para aprobar (71+)!</span>`;
+                        } else if (metrics.neededInRemaining !== null) {
+                            if (metrics.neededInRemaining > 100) {
+                                neededBanner = `<span class="text-xs font-semibold text-rose-700 bg-rose-100 px-3 py-1.5 rounded-xl">⚠️ Requiere promediar ${metrics.neededInRemaining.toFixed(1)} en lo que falta</span>`;
+                            } else {
+                                neededBanner = `<span class="text-xs font-semibold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl">🎯 Necesitas <b>${metrics.neededInRemaining.toFixed(1)} / 100</b> en el ${metrics.remainingWeight}% restante para C</span>`;
+                            }
+                        }
+                    } else {
+                        neededBanner = metrics.totalAccumulated >= 71
+                            ? `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">Semestre Concluido: Aprobada con ${metrics.totalAccumulated.toFixed(1)} (${metrics.letter})</span>`
+                            : `<span class="text-xs font-bold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200">Semestre Concluido: Reprobada (${metrics.totalAccumulated.toFixed(1)})</span>`;
+                    }
+
+                    const semestralScore = (sub.examen && sub.examen.score !== null && sub.examen.score !== undefined && sub.examen.score !== '') 
+                        ? parseFloat(sub.examen.score).toFixed(1) : 'Pendiente';
+
+                    card.innerHTML = `
+                        <div class="p-5 sm:p-6 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-rose-100">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                        ${sub.code ? `<span class="px-2.5 py-0.5 rounded-lg bg-rose-100 text-rose-800 text-xs font-mono font-bold">${escapeHtml(sub.code)}</span>` : ''}
+                                        <h3 class="text-xl sm:text-2xl font-serif font-bold text-rose-950">${escapeHtml(sub.name)}</h3>
+                                        <span class="text-xs px-2.5 py-0.5 rounded-full font-medium bg-rose-100 text-rose-800">${sub.credits} Créditos</span>
+                                    </div>
+                                    <p class="text-xs text-stone-500 flex items-center gap-2 flex-wrap">
+                                        <span>👩‍🏫 ${sub.teacher ? escapeHtml(sub.teacher) : 'Docente por asignar'}</span>
+                                        <span>•</span>
+                                        <span>Evaluado: <strong class="text-rose-700">${metrics.completedWeight}%</strong></span>
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <span class="text-[10px] uppercase font-bold text-rose-500 tracking-wider block">Acumulado Actual</span>
+                                        <div class="flex items-baseline gap-1.5 justify-end">
+                                            <span class="text-3xl font-extrabold ${metrics.totalAccumulated >= 71 ? 'text-emerald-700' : 'text-rose-950'}">${metrics.totalAccumulated.toFixed(1)}</span>
+                                            <span class="text-xs text-rose-400 font-semibold">/ 100</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 border-l border-rose-100 pl-2">
+                                        <button onclick="window.openEditSubjectModal('${sub.id}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl" title="Editar Materia">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <button onclick="window.deleteSubject('${sub.id}')" class="p-2 text-rose-300 hover:text-rose-700 hover:bg-rose-50 rounded-xl" title="Eliminar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                ${neededBanner}
+                                <div class="w-full sm:w-48 bg-rose-100 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-rose-400 to-rose-600 h-2 rounded-full transition-all duration-500" style="width: ${metrics.completedWeight}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                                <div class="bg-petal/80 rounded-2xl p-3.5 border border-rose-200/70 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between pb-2 border-b border-rose-100">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs font-bold text-rose-900">📝 Parciales</span>
+                                                <span class="text-[10px] bg-rose-200 text-rose-800 font-bold px-1.5 py-0.5 rounded">33%</span>
+                                            </div>
+                                            <span class="text-xs font-bold text-rose-900">
+                                                ${metrics.parcialAvg !== null ? metrics.parcialAvg.toFixed(1) : '—'}
+                                            </span>
+                                        </div>
+                                        <div class="space-y-1.5 mt-2 max-h-36 overflow-y-auto">
+                                            ${parcialRows}
+                                        </div>
+                                    </div>
+                                    <button onclick="window.openAddItemModal('${sub.id}', 'parciales')" class="mt-3 w-full py-1.5 bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-[11px] font-semibold rounded-xl transition">
+                                        + Agregar Parcial
+                                    </button>
+                                </div>
+
+                                <div class="bg-petal/80 rounded-2xl p-3.5 border border-rose-200/70 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between pb-2 border-b border-rose-100">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs font-bold text-rose-900">📚 Tareas / Talleres</span>
+                                                <span class="text-[10px] bg-rose-200 text-rose-800 font-bold px-1.5 py-0.5 rounded">33%</span>
+                                            </div>
+                                            <span class="text-xs font-bold text-rose-900">
+                                                ${metrics.tareaAvg !== null ? metrics.tareaAvg.toFixed(1) : '—'}
+                                            </span>
+                                        </div>
+                                        <div class="space-y-1.5 mt-2 max-h-36 overflow-y-auto">
+                                            ${tareaRows}
+                                        </div>
+                                    </div>
+                                    <button onclick="window.openAddItemModal('${sub.id}', 'tareas')" class="mt-3 w-full py-1.5 bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-[11px] font-semibold rounded-xl transition">
+                                        + Agregar Asignación
+                                    </button>
+                                </div>
+
+                                <div class="bg-petal/80 rounded-2xl p-3.5 border border-rose-200/70 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between pb-2 border-b border-rose-100">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs font-bold text-rose-900">🎯 Semestral</span>
+                                                <span class="text-[10px] bg-rose-200 text-rose-800 font-bold px-1.5 py-0.5 rounded">34%</span>
+                                            </div>
+                                            <span class="text-xs font-bold text-rose-900">${semestralScore}</span>
+                                        </div>
+                                        <div class="mt-3 p-2 bg-white rounded-xl border border-rose-100 space-y-1">
+                                            <label class="text-[11px] font-semibold text-rose-800 block">Nota Semestral (0-100):</label>
+                                            <input type="number" step="0.1" min="0" max="100" placeholder="0 - 100" value="${sub.examen && sub.examen.score !== null ? sub.examen.score : ''}" onchange="window.updateExamenScore('${sub.id}', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-rose-200 focus:outline-none focus:ring-1 focus:ring-rose-400">
+                                        </div>
+                                    </div>
+                                    <p class="text-[10px] text-stone-400 mt-2 italic text-center">Aporta 34 puntos netos al total.</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 border-t border-rose-100">
+                                <input type="text" placeholder="Apunte rápido (fechas, laboratorio, salón)..." value="${escapeHtml(sub.notes || '')}" onchange="window.updateSubjectNotes('${sub.id}', this.value)" class="w-full text-xs text-stone-700 bg-rose-50/40 hover:bg-white focus:bg-white border border-rose-200/70 rounded-xl px-3 py-2 focus:ring-1 focus:ring-rose-400 focus:outline-none transition">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function renderGlobalSheet() {
+            const listContainer = document.getElementById('globalYearsList');
+            if (!listContainer) return;
+
+            let html = '';
+
+            appData.years.forEach(y => {
+                html += `
+                    <div class="border border-rose-200 rounded-3xl p-5 bg-rose-50/40 space-y-4">
+                        <div class="flex items-center justify-between border-b border-rose-200/70 pb-3">
+                            <h3 class="font-serif font-bold text-xl text-rose-950 flex items-center gap-2">
+                                <span>📚 Año ${y.yearNum}</span>
+                                <span class="text-xs font-sans font-semibold text-rose-600 bg-white px-2.5 py-0.5 rounded-full border border-rose-200">
+                                    ${Object.keys(y.periods).length} Períodos
+                                </span>
+                            </h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                `;
+
+                Object.entries(y.periods).forEach(([pKey, pObj]) => {
+                    let pCredits = 0;
+                    let pPassed = 0;
+
+                    const subjectsHtml = pObj.subjects.map(s => {
+                        const m = calculateSubjectScores(s);
+                        const creds = parseFloat(s.credits) || 0;
+                        pCredits += creds;
+                        if (m.isPassing) pPassed++;
+
+                        let gradeBadge = '';
+                        if (s.mode === 'direct') {
+                            const badgeColor = m.letter === 'A' ? 'bg-emerald-100 text-emerald-800' : (m.letter === 'B' ? 'bg-pink-100 text-pink-800' : 'bg-amber-100 text-amber-800');
+                            gradeBadge = `<span class="px-2 py-0.5 rounded font-bold text-xs ${badgeColor}">${m.letter} (${s.finalScore})</span>`;
+                        } else {
+                            if (m.completedWeight > 0) {
+                                gradeBadge = `<span class="px-2 py-0.5 rounded font-bold text-xs bg-rose-100 text-rose-900">${m.totalAccumulated.toFixed(1)} (${m.completedWeight}%)</span>`;
+                            } else {
+                                gradeBadge = `<span class="px-2 py-0.5 rounded text-xs text-stone-400 bg-stone-100 font-medium">Por cursar</span>`;
+                            }
+                        }
+
+                        return `
+                            <div class="flex items-center justify-between py-1.5 px-2 rounded-xl hover:bg-rose-50/80 transition text-xs border-b border-rose-100/50 last:border-0">
+                                <div class="truncate pr-2">
+                                    <span class="font-mono text-[10px] text-rose-400 font-bold mr-1">${escapeHtml(s.code)}</span>
+                                    <span class="font-medium text-stone-800" title="${escapeHtml(s.name)}">${escapeHtml(s.name)}</span>
+                                    <span class="text-[10px] text-stone-400 ml-1">(${s.credits}cr)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    ${gradeBadge}
+                                    <div class="inline-flex rounded-lg border border-rose-200 bg-white p-0.5">
+                                        <button onclick="window.quickSetGrade('${s.id}', 'A')" class="px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-50 rounded" title="Marcar como A">A</button>
+                                        <button onclick="window.quickSetGrade('${s.id}', 'B')" class="px-1.5 py-0.5 text-[10px] font-bold text-rose-700 hover:bg-rose-50 rounded" title="Marcar como B">B</button>
+                                        <button onclick="window.quickSetGrade('${s.id}', 'C')" class="px-1.5 py-0.5 text-[10px] font-bold text-amber-700 hover:bg-amber-50 rounded" title="Marcar como C">C</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    html += `
+                        <div class="bg-white rounded-2xl p-4 border border-rose-100 shadow-xs flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between pb-2 mb-2 border-b border-rose-50">
+                                    <span class="font-bold text-rose-950 text-xs sm:text-sm">${escapeHtml(pObj.name)}</span>
+                                    <span class="text-[11px] font-semibold text-rose-500">${pCredits} Créditos</span>
+                                </div>
+                                <div class="space-y-0.5">
+                                    ${subjectsHtml}
+                                </div>
+                            </div>
+                            <button onclick="window.goToPeriodDetailed(${y.yearNum}, '${pKey}')" class="mt-3.5 w-full py-1.5 text-xs text-center font-semibold text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                                Abrir Desglose Detallado (33/33/34) →
+                            </button>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function renderItemRow(subjectId, category, index, name, score) {
+            const hasScore = score !== null && score !== undefined && score !== '';
+            const displayScore = hasScore ? parseFloat(score).toFixed(1) : '—';
+            const badgeClass = hasScore 
+                ? (parseFloat(score) >= 71 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200')
+                : 'bg-stone-50 text-stone-400 border-stone-200';
+
+            return `
+                <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-rose-100 text-xs group">
+                    <span class="truncate max-w-[130px] font-medium text-stone-700" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded-lg border font-bold text-[11px] ${badgeClass}">${displayScore}</span>
+                        <button onclick="window.openEditItemModal('${subjectId}', '${category}', ${index})" class="text-rose-400 hover:text-rose-700 p-1" title="Editar">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        </button>
+                        <button onclick="window.deleteItem('${subjectId}', '${category}', ${index})" class="text-rose-300 hover:text-rose-600 p-1" title="Borrar">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Global functions for window scope binding
+        window.quickSetGrade = function(subjectId, letter) {
+            let found = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) found = s;
+                });
+            });
+
+            if (!found) return;
+
+            found.mode = 'direct';
+            found.finalLetter = letter.toUpperCase();
+            if (letter === 'A') found.finalScore = 95;
+            else if (letter === 'B') found.finalScore = 85;
+            else if (letter === 'C') found.finalScore = 75;
+            else found.finalScore = 60;
+
+            found.notes = `Calificación registrada: Nota ${letter}`;
+            saveAppData();
+            renderSubjects();
+            showToast(`✨ ${found.name} actualizada con nota ${letter}`);
+        };
+
+        window.switchYear = function(yearNum) {
+            appData.activeYear = yearNum;
+            const yearObj = appData.years.find(y => y.yearNum === yearNum);
+            if (yearObj && !yearObj.periods[appData.activePeriod]) {
+                appData.activePeriod = 'sem1';
+            }
+            saveUiState();
+            renderSubjects();
+        };
+
+        window.switchPeriod = function(periodId) {
+            appData.activePeriod = periodId;
+            saveUiState();
+            renderSubjects();
+        };
+
+        window.goToPeriodDetailed = function(yearNum, periodKey) {
+            appData.activeYear = yearNum;
+            appData.activePeriod = periodKey;
+            appData.currentView = 'detailed';
+            saveUiState();
+            updateViewDisplay();
+            renderSubjects();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function updateViewDisplay() {
+            const isGlobal = appData.currentView === 'global';
+            const detailedSection = document.getElementById('detailedViewSection');
+            const globalSection = document.getElementById('globalSheetSection');
+            const navPanel = document.getElementById('navigationPanel');
+            const btnText = document.getElementById('btnViewToggleText');
+            const btnIcon = document.getElementById('btnViewToggleIcon');
+
+            if (isGlobal) {
+                detailedSection.classList.add('hidden');
+                globalSection.classList.remove('hidden');
+                navPanel.classList.add('hidden');
+                btnText.textContent = 'Ver Semestre en Curso';
+                btnIcon.textContent = '📖';
+            } else {
+                detailedSection.classList.remove('hidden');
+                globalSection.classList.add('hidden');
+                navPanel.classList.remove('hidden');
+                btnText.textContent = 'Vista Histórica General';
+                btnIcon.textContent = '📋';
+            }
+        }
+
+        const subjectModal = document.getElementById('subjectModal');
+        const subjectForm = document.getElementById('subjectForm');
+        const directGradeField = document.getElementById('directGradeField');
+        const calcModeRadios = document.getElementsByName('calcMode');
+
+        calcModeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'direct') {
+                    directGradeField.classList.remove('hidden');
+                } else {
+                    directGradeField.classList.add('hidden');
+                }
+            });
+        });
+
+        document.getElementById('formDirectLetter').addEventListener('change', (e) => {
+            const scoreInput = document.getElementById('formDirectScore');
+            switch(e.target.value) {
+                case 'A': scoreInput.value = 95; break;
+                case 'B': scoreInput.value = 85; break;
+                case 'C': scoreInput.value = 75; break;
+                case 'D': scoreInput.value = 65; break;
+                case 'F': scoreInput.value = 50; break;
+            }
+        });
+
+        window.openNewSubjectModal = function() {
+            subjectForm.reset();
+            document.getElementById('formSubjectId').value = '';
+            document.getElementById('formSubjectYear').value = appData.activeYear;
+            document.getElementById('formSubjectPeriod').value = appData.activePeriod;
+            document.getElementById('subjectModalTitle').textContent = 'Nueva Asignatura';
+            calcModeRadios[0].checked = true;
+            directGradeField.classList.add('hidden');
+            subjectModal.classList.remove('hidden');
+        };
+
+        window.openEditSubjectModal = function(subjectId) {
+            let foundSub = null;
+            let foundYear = null;
+            let foundPeriod = null;
+
+            appData.years.forEach(y => {
+                Object.entries(y.periods).forEach(([pKey, pObj]) => {
+                    const s = pObj.subjects.find(sub => sub.id === subjectId);
+                    if (s) {
+                        foundSub = s;
+                        foundYear = y.yearNum;
+                        foundPeriod = pKey;
+                    }
+                });
+            });
+
+            if (!foundSub) return;
+
+            document.getElementById('formSubjectId').value = foundSub.id;
+            document.getElementById('formSubjectYear').value = foundYear;
+            document.getElementById('formSubjectPeriod').value = foundPeriod;
+            document.getElementById('formSubjectCode').value = foundSub.code || '';
+            document.getElementById('formSubjectName').value = foundSub.name;
+            document.getElementById('formSubjectCredits').value = foundSub.credits;
+            document.getElementById('formSubjectTeacher').value = foundSub.teacher || '';
+
+            if (foundSub.mode === 'direct') {
+                calcModeRadios[1].checked = true;
+                directGradeField.classList.remove('hidden');
+                document.getElementById('formDirectLetter').value = foundSub.finalLetter || 'A';
+                document.getElementById('formDirectScore').value = foundSub.finalScore || 95;
+            } else {
+                calcModeRadios[0].checked = true;
+                directGradeField.classList.add('hidden');
+            }
+
+            document.getElementById('subjectModalTitle').textContent = 'Editar Asignatura';
+            subjectModal.classList.remove('hidden');
+        };
+
+        function closeSubjectModal() {
+            subjectModal.classList.add('hidden');
+        }
+
+        subjectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('formSubjectId').value;
+            const code = document.getElementById('formSubjectCode').value.trim();
+            const name = document.getElementById('formSubjectName').value.trim();
+            const credits = parseInt(document.getElementById('formSubjectCredits').value) || 0;
+            const teacher = document.getElementById('formSubjectTeacher').value.trim();
+            const mode = document.querySelector('input[name="calcMode"]:checked').value;
+
+            const targetYearNum = parseInt(document.getElementById('formSubjectYear').value) || appData.activeYear;
+            const targetPeriodKey = document.getElementById('formSubjectPeriod').value || appData.activePeriod;
+
+            const yearObj = appData.years.find(y => y.yearNum === targetYearNum);
+            const periodObj = yearObj ? yearObj.periods[targetPeriodKey] : null;
+
+            if (!periodObj) return;
+
+            if (id) {
+                const sub = periodObj.subjects.find(s => s.id === id);
+                if (sub) {
+                    sub.code = code;
+                    sub.name = name;
+                    sub.credits = credits;
+                    sub.teacher = teacher;
+                    sub.mode = mode;
+                    if (mode === 'direct') {
+                        sub.finalLetter = document.getElementById('formDirectLetter').value;
+                        sub.finalScore = parseFloat(document.getElementById('formDirectScore').value) || 95;
+                    }
+                }
+                showToast('🌸 Asignatura actualizada');
+            } else {
+                const newSub = {
+                    id: 's_' + Date.now(),
+                    code,
+                    name,
+                    teacher,
+                    credits,
+                    mode,
+                    notes: ''
+                };
+                if (mode === 'direct') {
+                    newSub.finalLetter = document.getElementById('formDirectLetter').value;
+                    newSub.finalScore = parseFloat(document.getElementById('formDirectScore').value) || 95;
+                } else {
+                    newSub.parciales = [];
+                    newSub.tareas = [];
+                    newSub.examen = { name: 'Examen Semestral', score: null };
+                }
+                periodObj.subjects.push(newSub);
+                showToast('✨ Asignatura agregada');
+            }
+
+            saveAppData();
+            renderSubjects();
+            closeSubjectModal();
+        });
+
+        window.deleteSubject = function(subjectId) {
+            let foundSub = null, foundPeriod = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) {
+                        foundSub = s;
+                        foundPeriod = p;
+                    }
+                });
+            });
+
+            if (!foundSub || !foundPeriod) return;
+
+            showConfirmModal(`¿Eliminar ${foundSub.name}?`, 'Se borrarán sus evaluaciones registradas.', () => {
+                foundPeriod.subjects = foundPeriod.subjects.filter(s => s.id !== subjectId);
+                saveAppData();
+                renderSubjects();
+                showToast('🗑️ Asignatura eliminada');
+            });
+        };
+
+        const itemModal = document.getElementById('itemModal');
+        const itemForm = document.getElementById('itemForm');
+
+        window.openAddItemModal = function(subjectId, category) {
+            itemForm.reset();
+            document.getElementById('formItemSubjectId').value = subjectId;
+            document.getElementById('formItemCategory').value = category;
+            document.getElementById('formItemIndex').value = '';
+            document.getElementById('itemModalTitle').textContent = category === 'parciales' ? 'Nuevo Parcial' : 'Nueva Asignación / Taller';
+            document.getElementById('itemModalSubtitle').textContent = category === 'parciales' ? 'Ponderación: 33% del semestre' : 'Ponderación: 33% del semestre';
+            itemModal.classList.remove('hidden');
+        };
+
+        window.openEditItemModal = function(subjectId, category, index) {
+            let foundSub = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) foundSub = s;
+                });
+            });
+
+            if (!foundSub || !foundSub[category] || !foundSub[category][index]) return;
+
+            const item = foundSub[category][index];
+            document.getElementById('formItemSubjectId').value = subjectId;
+            document.getElementById('formItemCategory').value = category;
+            document.getElementById('formItemIndex').value = index;
+            document.getElementById('formItemName').value = item.name;
+            document.getElementById('formItemScore').value = item.score !== null ? item.score : '';
+            document.getElementById('itemModalTitle').textContent = 'Editar Actividad';
+            itemModal.classList.remove('hidden');
+        };
+
+        itemForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const subjectId = document.getElementById('formItemSubjectId').value;
+            const category = document.getElementById('formItemCategory').value;
+            const indexStr = document.getElementById('formItemIndex').value;
+            const name = document.getElementById('formItemName').value.trim();
+            const rawScore = document.getElementById('formItemScore').value;
+            const score = rawScore !== '' ? parseFloat(rawScore) : null;
+
+            let foundSub = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) foundSub = s;
+                });
+            });
+
+            if (!foundSub) return;
+            if (!foundSub[category]) foundSub[category] = [];
+
+            if (indexStr !== '') {
+                foundSub[category][parseInt(indexStr)] = { name, score };
+                showToast('🌸 Actividad actualizada');
+            } else {
+                foundSub[category].push({ name, score });
+                showToast('✨ Actividad guardada');
+            }
+
+            saveAppData();
+            renderSubjects();
+            itemModal.classList.add('hidden');
+        });
+
+        window.deleteItem = function(subjectId, category, index) {
+            let foundSub = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) foundSub = s;
+                });
+            });
+
+            if (!foundSub || !foundSub[category]) return;
+
+            showConfirmModal('¿Eliminar actividad?', `Se quitará "${foundSub[category][index].name}".`, () => {
+                foundSub[category].splice(index, 1);
+                saveAppData();
+                renderSubjects();
+                showToast('🗑️ Eliminado');
+            });
+        };
+
+        window.updateExamenScore = function(subjectId, val) {
+            let foundSub = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) foundSub = s;
+                });
+            });
+
+            if (!foundSub) return;
+
+            if (!foundSub.examen) foundSub.examen = { name: 'Examen Semestral', score: null };
+            foundSub.examen.score = val !== '' ? parseFloat(val) : null;
+            saveAppData();
+            renderSubjects();
+            showToast('🎯 Examen Semestral registrado');
+        };
+
+        window.updateSubjectNotes = function(subjectId, text) {
+            let foundSub = null;
+            appData.years.forEach(y => {
+                Object.values(y.periods).forEach(p => {
+                    const s = p.subjects.find(sub => sub.id === subjectId);
+                    if (s) foundSub = s;
+                });
+            });
+
+            if (foundSub) {
+                foundSub.notes = text;
+                saveAppData();
+            }
+        };
+
+        const cloudModal = document.getElementById('cloudModal');
+        document.getElementById('btnOpenCloudModal').onclick = () => { updateCloudModal(); cloudModal.classList.remove('hidden'); };
+        document.getElementById('btnCloseCloudModal').onclick = () => cloudModal.classList.add('hidden');
+        document.getElementById('btnDoneCloudModal').onclick = () => cloudModal.classList.add('hidden');
+        document.getElementById('btnGoogleLogin').onclick = signInWithGoogle;
+        document.getElementById('btnLogout').onclick = signOutCloud;
+
+        // Importar respaldo JSON (por ejemplo, el que descargaste de la versión anterior)
+        const importInput = document.getElementById('importFileInput');
+        document.getElementById('btnImport').onclick = () => importInput.click();
+        importInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const parsed = JSON.parse(reader.result);
+                    if (!parsed || !Array.isArray(parsed.years)) throw new Error('Formato inválido');
+                    showConfirmModal('¿Importar este respaldo?', 'Reemplazará las notas actuales en este dispositivo y en la nube.', () => {
+                        appData = parsed;
+                        if (!appData.activeYear) appData.activeYear = 1;
+                        if (!appData.activePeriod) appData.activePeriod = 'sem1';
+                        if (!appData.currentView) appData.currentView = 'detailed';
+                        saveAppData();
+                        updateViewDisplay();
+                        renderSubjects();
+                        showToast('📥 Respaldo importado');
+                    });
+                } catch (err) {
+                    showToast('Ese archivo no es un respaldo válido', '❌');
+                }
+                importInput.value = '';
+            };
+            reader.readAsText(file);
+        });
+        function showConfirmModal(title, text, onConfirm) {
+            const mId = 'conf_modal_' + Date.now();
+            const el = document.createElement('div');
+            el.id = mId;
+            el.className = 'fixed inset-0 bg-stone-950/45 backdrop-blur-xs z-50 flex items-center justify-center p-4';
+            el.innerHTML = `
+                <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200">
+                    <h4 class="text-xl font-serif font-bold text-rose-950 mb-2">${escapeHtml(title)}</h4>
+                    <p class="text-xs text-stone-600 mb-6">${escapeHtml(text)}</p>
+                    <div class="flex justify-end gap-2.5">
+                        <button id="cancel_${mId}" class="px-4 py-2 rounded-xl border border-rose-200 text-rose-700 text-xs font-semibold hover:bg-rose-50">Cancelar</button>
+                        <button id="ok_${mId}" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md shadow-rose-300">Confirmar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(el);
+
+            document.getElementById(`cancel_${mId}`).onclick = () => el.remove();
+            document.getElementById(`ok_${mId}`).onclick = () => {
+                el.remove();
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+        }
+
+        function showToast(msg, icon = '🌸') {
+            const toast = document.getElementById('toastMessage');
+            document.getElementById('toastText').textContent = msg;
+            document.getElementById('toastIcon').textContent = icon;
+            toast.classList.remove('opacity-0', 'translate-y-24');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-24');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2500);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // View Toggle & Global buttons
+        document.getElementById('btnViewToggle').addEventListener('click', () => {
+            appData.currentView = appData.currentView === 'detailed' ? 'global' : 'detailed';
+            saveUiState();
+            updateViewDisplay();
+            renderSubjects();
+        });
+
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", str);
+            dl.setAttribute("download", `notas_udelas_biomedica_${new Date().toISOString().slice(0,10)}.json`);
+            dl.click();
+            showToast('📄 Respaldo descargado');
+        });
+
+        document.getElementById('btnResetPlan').addEventListener('click', () => {
+            showConfirmModal('¿Recargar Plan Oficial UDELAS?', 'Se restablecerán las 72 asignaturas de los 5 años y tus notas del primer semestre.', () => {
+                appData = JSON.parse(JSON.stringify(defaultStudyPlan));
+                saveAppData();
+                updateViewDisplay();
+                renderSubjects();
+                showToast('🔄 Plan UDELAS restablecido');
+            });
+        });
+
+        document.getElementById('btnOpenNewSubject').onclick = window.openNewSubjectModal;
+        document.getElementById('btnCloseSubjectModal').onclick = closeSubjectModal;
+        document.getElementById('btnCancelSubject').onclick = closeSubjectModal;
+        document.getElementById('btnCloseItemModal').onclick = () => itemModal.classList.add('hidden');
+        document.getElementById('btnCancelItem').onclick = () => itemModal.classList.add('hidden');
+        document.getElementById('searchInput').addEventListener('input', renderSubjects);
+
+        loadAppData();
+        updateViewDisplay();
+        renderSubjects();
+        initCloudSync();
+    </script>
+</body>
+</html>
